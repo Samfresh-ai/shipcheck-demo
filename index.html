@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShipCheck — MtP World Product Day 2026</title>
+  <meta name="description" content="Self-playing narrated submission presentation for ShipCheck.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230A0A0B'/%3E%3Cpath d='M7 17.5 13 23 25 9' fill='none' stroke='%23E8A94E' stroke-width='3' stroke-linecap='square'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0A0A0B;
+      --surface: #111114;
+      --surface2: #18181D;
+      --grid: rgba(255,255,255,0.03);
+      --text: #F0EFE8;
+      --text-muted: #7A7975;
+      --text-dim: #3D3D3E;
+      --amber: #E8A94E;
+      --amber-dim: rgba(232,169,78,0.12);
+      --red: #E05252;
+      --red-dim: rgba(224,82,82,0.15);
+      --green: #4CAF78;
+      --green-dim: rgba(76,175,120,0.15);
+      --orange: #D98240;
+      --orange-dim: rgba(217,130,64,0.15);
+      --border: rgba(255,255,255,0.07);
+      --accent-line: rgba(232,169,78,0.4);
+      --controls-h: 48px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Space Mono", monospace;
+      overflow: hidden;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(240,239,232,0.035), transparent 28rem),
+        linear-gradient(180deg, rgba(10,10,11,0) 0%, rgba(10,10,11,0.45) 100%);
+      z-index: 1;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+    }
+
+    button:focus-visible {
+      outline: 1px solid var(--amber);
+      outline-offset: 4px;
+    }
+
+    .slide-container {
+      position: fixed;
+      inset: 0 0 var(--controls-h) 0;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: clamp(22px, 5vw, 64px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease-in-out;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .slide-counter {
+      position: absolute;
+      top: 28px;
+      right: 32px;
+      font-family: "Space Mono", monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.12em;
+    }
+
+    .bottom-mark {
+      position: absolute;
+      left: clamp(20px, 4vw, 48px);
+      bottom: clamp(18px, 3.5vw, 42px);
+      color: var(--text-dim);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .serif {
+      font-family: "DM Serif Display", serif;
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .mono {
+      font-family: "Space Mono", monospace;
+    }
+
+    .mono-bold {
+      font-family: "Space Mono", monospace;
+      font-weight: 700;
+    }
+
+    .label-sm {
+      position: absolute;
+      top: 34px;
+      left: clamp(22px, 5vw, 64px);
+      font-family: "Space Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+    }
+
+    .text-muted {
+      color: var(--text-muted);
+    }
+
+    .text-dim {
+      color: var(--text-dim);
+    }
+
+    .text-amber {
+      color: var(--amber);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .start-prompt {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--text-muted);
+      font-size: clamp(12px, 1.5vw, 15px);
+      letter-spacing: 0.04em;
+      z-index: 6;
+      transition: opacity 0.35s ease-out, transform 0.35s ease-out;
+    }
+
+    .start-prompt.hidden {
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+    }
+
+    .start-prompt button {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 12px 18px;
+      cursor: pointer;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+    }
+
+    .start-meta {
+      color: var(--text-dim);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .controls {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--controls-h);
+      background: rgba(10,10,11,0.97);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: auto auto 1fr auto;
+      align-items: center;
+      gap: 24px;
+      padding: 0 24px;
+      z-index: 100;
+      font-family: "Space Mono", monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .control-button {
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .control-title {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    .progress-line {
+      position: fixed;
+      bottom: var(--controls-h);
+      left: 0;
+      height: 2px;
+      background: var(--amber);
+      width: 0%;
+      transition-property: width;
+      transition-timing-function: linear;
+      z-index: 99;
+    }
+
+    .hook-stack {
+      width: min(90vw, 900px);
+      min-height: 230px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(16px, 2.8vh, 26px);
+      text-align: center;
+    }
+
+    .typewriter-group {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(18px, 3vh, 28px);
+      min-height: 145px;
+      transition: opacity 0.6s ease-out;
+    }
+
+    .typewriter-line {
+      min-height: 1.4em;
+      color: var(--text-muted);
+      font-size: clamp(13px, 2vw, 18px);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .hook-final {
+      display: grid;
+      gap: 14px;
+      text-align: center;
+    }
+
+    .hook-title {
+      font-size: clamp(32px, 5vw, 56px);
+      color: var(--text);
+    }
+
+    .hook-subtitle {
+      color: var(--text-muted);
+      font-size: clamp(12px, 1.8vw, 16px);
+    }
+
+    .timeline {
+      width: min(92vw, 900px);
+      display: grid;
+      grid-template-columns: auto minmax(44px, 1fr) auto minmax(44px, 1fr) auto minmax(44px, 1fr) auto;
+      align-items: center;
+      gap: clamp(8px, 1.6vw, 18px);
+      margin-top: 12px;
+    }
+
+    .timeline-label {
+      color: var(--text-muted);
+      font-size: clamp(10px, 1.4vw, 12px);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .timeline-line {
+      height: 1px;
+      width: 0;
+      background: var(--border);
+      transition: width 0.45s ease-out;
+    }
+
+    .timeline-line.visible {
+      width: 100%;
+    }
+
+    .gap-box {
+      border: 1px solid var(--amber);
+      background: var(--amber-dim);
+      padding: 12px 20px;
+      font-family: "Space Mono", monospace;
+      font-size: 13px;
+      color: var(--amber);
+      text-align: center;
+      animation: gapPulse 2s ease-in-out infinite;
+      min-width: 128px;
+    }
+
+    .gap-note {
+      display: block;
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    @keyframes gapPulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(232,169,78,0);
+      }
+      50% {
+        box-shadow: 0 0 16px 2px rgba(232,169,78,0.15);
+      }
+    }
+
+    .problem-copy {
+      margin-top: clamp(38px, 6vh, 70px);
+      display: grid;
+      gap: 16px;
+      text-align: center;
+      max-width: 760px;
+    }
+
+    .problem-copy h2 {
+      font-size: clamp(28px, 4.6vw, 52px);
+    }
+
+    .problem-copy p {
+      color: var(--text-muted);
+      font-size: clamp(12px, 1.5vw, 14px);
+      line-height: 1.8;
+    }
+
+    .product-grid {
+      width: min(96vw, 1040px);
+      display: grid;
+      grid-template-columns: minmax(220px, 0.4fr) minmax(300px, 0.6fr);
+      align-items: center;
+      gap: clamp(32px, 7vw, 88px);
+    }
+
+    .metric-stack {
+      display: grid;
+      gap: clamp(20px, 3vh, 30px);
+    }
+
+    .metric-item {
+      display: grid;
+      gap: 6px;
+    }
+
+    .metric-number {
+      color: var(--text);
+      font-size: clamp(46px, 8vw, 76px);
+      line-height: 1;
+    }
+
+    .metric-label {
+      color: var(--text-muted);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .score-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .score-circle {
+      overflow: visible;
+    }
+
+    .section-pills {
+      position: absolute;
+      left: 50%;
+      bottom: clamp(40px, 8vh, 78px);
+      width: min(92vw, 1040px);
+      transform: translateX(-50%);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .section-pill {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 7px 14px;
+      color: var(--text-muted);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .proof-card {
+      width: min(90vw, 520px);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: clamp(24px, 4vw, 36px);
+      font-family: "Space Mono", monospace;
+    }
+
+    .proof-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: center;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .proof-title {
+      font-size: clamp(19px, 3vw, 26px);
+      color: var(--text);
+    }
+
+    .proof-state {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--amber);
+      background: var(--amber-dim);
+      color: var(--amber);
+      padding: 3px 10px;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .report-list {
+      display: grid;
+      gap: 16px;
+      padding-top: 24px;
+    }
+
+    .report-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .tier-red {
+      background: var(--red-dim);
+      color: var(--red);
+      border-color: rgba(224,82,82,0.3);
+    }
+
+    .tier-amber {
+      background: var(--orange-dim);
+      color: var(--orange);
+      border-color: rgba(217,130,64,0.3);
+    }
+
+    .tier-green {
+      background: var(--green-dim);
+      color: var(--green);
+      border-color: rgba(76,175,120,0.3);
+    }
+
+    .proof-quote {
+      margin-top: 28px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: clamp(22px, 3.8vw, 38px);
+    }
+
+    .novus-grid {
+      width: min(92vw, 760px);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: clamp(22px, 5vw, 56px);
+      align-items: center;
+    }
+
+    .bar-column {
+      height: 330px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 14px;
+      justify-items: center;
+      text-align: center;
+    }
+
+    .bar-label {
+      color: var(--text-dim);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .bar-label strong {
+      display: block;
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 9px;
+      letter-spacing: 0.04em;
+    }
+
+    .bar-stage {
+      width: 76px;
+      height: 176px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .bar {
+      width: 56px;
+      height: 160px;
+      transform-origin: bottom;
+      transform: scaleY(0);
+      transition: transform 0.9s ease-out;
+      border-radius: 3px 3px 0 0;
+    }
+
+    .bar.before {
+      background: var(--red);
+    }
+
+    .bar.after {
+      background: var(--green);
+    }
+
+    .percent {
+      font-size: 36px;
+      line-height: 1;
+    }
+
+    .before-color {
+      color: var(--red);
+    }
+
+    .after-color {
+      color: var(--green);
+    }
+
+    .arrow {
+      color: var(--text-dim);
+      font-size: 20px;
+    }
+
+    .novus-copy {
+      margin-top: clamp(28px, 5vh, 48px);
+      display: grid;
+      gap: 12px;
+      text-align: center;
+      max-width: 760px;
+    }
+
+    .novus-copy h2 {
+      font-size: clamp(26px, 4vw, 44px);
+    }
+
+    .novus-copy p {
+      color: var(--text-muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .closing-stack {
+      display: grid;
+      gap: clamp(16px, 3vh, 28px);
+      justify-items: center;
+      text-align: center;
+      width: min(92vw, 760px);
+    }
+
+    .closing-name {
+      font-size: clamp(54px, 9vw, 96px);
+    }
+
+    .closing-tagline {
+      color: var(--text-muted);
+      font-size: clamp(12px, 1.6vw, 14px);
+    }
+
+    .closing-rule {
+      border: none;
+      border-top: 1px solid var(--border);
+      width: 200px;
+    }
+
+    .closing-url {
+      color: var(--amber);
+      font-size: clamp(13px, 2vw, 16px);
+      font-weight: 700;
+    }
+
+    .byline {
+      color: var(--text-dim);
+      font-size: 10px;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 760px) {
+      :root {
+        --controls-h: 56px;
+      }
+
+      .slide {
+        padding: 22px;
+      }
+
+      .slide-counter {
+        top: 18px;
+        right: 18px;
+      }
+
+      .label-sm {
+        top: 20px;
+        left: 20px;
+      }
+
+      .controls {
+        grid-template-columns: auto auto auto;
+        gap: 12px;
+        padding: 0 14px;
+      }
+
+      .control-title {
+        display: none;
+      }
+
+      .timeline {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        width: min(88vw, 360px);
+        text-align: center;
+      }
+
+      .timeline-line {
+        width: 1px;
+        height: 20px;
+        justify-self: center;
+      }
+
+      .timeline-line.visible {
+        width: 1px;
+        height: 20px;
+      }
+
+      .gap-box {
+        justify-self: center;
+      }
+
+      .product-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        transform: translateY(-10px);
+      }
+
+      .metric-stack {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        width: 100%;
+      }
+
+      .metric-number {
+        font-size: clamp(28px, 10vw, 44px);
+      }
+
+      .metric-label {
+        font-size: 9px;
+      }
+
+      .section-pills {
+        bottom: 20px;
+        gap: 7px;
+      }
+
+      .section-pill {
+        font-size: 8px;
+        padding: 5px 7px;
+      }
+
+      .proof-card {
+        padding: 20px;
+      }
+
+      .proof-head {
+        grid-template-columns: 1fr;
+        justify-items: start;
+      }
+
+      .report-row {
+        grid-template-columns: auto 1fr;
+      }
+
+      .report-row .badge {
+        grid-column: 2;
+        justify-self: start;
+      }
+
+      .novus-grid {
+        grid-template-columns: 1fr auto 1fr;
+        gap: 16px;
+      }
+
+      .bar-column {
+        height: 260px;
+      }
+
+      .bar-stage {
+        width: 62px;
+        height: 144px;
+      }
+
+      .bar {
+        width: 44px;
+        height: 132px;
+      }
+
+      .percent {
+        font-size: 28px;
+      }
+    }
+
+    @media (max-height: 620px) {
+      .slide {
+        transform: scale(0.92);
+      }
+
+      .section-pills {
+        bottom: 18px;
+      }
+
+      .problem-copy,
+      .novus-copy {
+        margin-top: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="slide-container" aria-live="polite">
+    <div class="slide active" id="slide1" data-slide="1" data-duration="15000">
+      <div class="slide-counter">01 / 06</div>
+      <div class="start-prompt" id="startPrompt">
+        <button type="button" id="startButton">▶ Click to start with voiceover</button>
+        <p class="start-meta">89s • 6 slides • auto-advance</p>
+      </div>
+      <div class="hook-stack" aria-label="Opening questions">
+        <div class="typewriter-group" id="questionGroup">
+          <p class="typewriter-line" data-typewriter="WHO IS YOUR USER?"></p>
+          <p class="typewriter-line" data-typewriter="WHAT DO THEY DO INSTEAD OF YOUR PRODUCT?"></p>
+          <p class="typewriter-line" data-typewriter="HOW WILL THE FIRST 10 USERS FIND YOU?"></p>
+        </div>
+        <div class="hook-final">
+          <h1 class="serif hook-title reveal" data-hook-final>Ship with intention.</h1>
+          <p class="mono hook-subtitle reveal" data-hook-final>Not just enthusiasm.</p>
+        </div>
+      </div>
+      <p class="bottom-mark">SHIPCHECK · MTP WORLD PRODUCT DAY 2026</p>
+    </div>
+
+    <div class="slide" id="slide2" data-slide="2" data-duration="13000">
+      <p class="label-sm reveal">THE GAP</p>
+      <div class="slide-counter">02 / 06</div>
+      <div class="timeline" aria-label="Idea to deploy timeline">
+        <span class="timeline-label reveal" data-step="1">IDEA</span>
+        <span class="timeline-line" data-line="1"></span>
+        <span class="timeline-label reveal" data-step="2">BUILD</span>
+        <span class="timeline-line" data-line="2"></span>
+        <div class="gap-box reveal" data-step="3">
+          10 minutes
+          <span class="gap-note">that most builders skip</span>
+        </div>
+        <span class="timeline-line" data-line="3"></span>
+        <span class="timeline-label reveal" data-step="4">DEPLOY</span>
+      </div>
+      <div class="problem-copy">
+        <h2 class="serif reveal">The tool between thinking and shipping<br>didn't exist.</h2>
+        <p class="mono reveal">Not knowledge. Not effort. A fast, honest forcing function.</p>
+      </div>
+    </div>
+
+    <div class="slide" id="slide3" data-slide="3" data-duration="18000">
+      <div class="slide-counter">03 / 06</div>
+      <div class="product-grid">
+        <div class="metric-stack">
+          <div class="metric-item reveal">
+            <span class="mono-bold metric-number">20</span>
+            <span class="mono metric-label">QUESTIONS</span>
+          </div>
+          <div class="metric-item reveal">
+            <span class="mono-bold metric-number">5</span>
+            <span class="mono metric-label">SECTIONS</span>
+          </div>
+          <div class="metric-item reveal">
+            <span class="mono-bold metric-number">0-100</span>
+            <span class="mono metric-label">SCORE</span>
+          </div>
+        </div>
+        <div class="score-wrap reveal">
+          <svg class="score-circle" width="220" height="220" viewBox="0 0 240 240" role="img" aria-label="ShipCheck score 67 almost ready">
+            <circle cx="120" cy="120" r="100" fill="none" stroke="var(--surface2)" stroke-width="6"></circle>
+            <circle class="score-ring" cx="120" cy="120" r="100" fill="none" stroke="var(--amber)" stroke-width="6" stroke-linecap="round" stroke-dasharray="628.3" stroke-dashoffset="628.3" transform="rotate(-90 120 120)" style="transition: stroke-dashoffset 1.4s cubic-bezier(0.34,1.56,0.64,1);"></circle>
+            <text class="score-number" x="120" y="114" text-anchor="middle" dominant-baseline="middle" fill="var(--amber)" font-family="Space Mono, monospace" font-weight="700" font-size="52">0</text>
+            <text x="120" y="148" text-anchor="middle" fill="var(--text-muted)" font-family="Space Mono, monospace" font-size="10" letter-spacing="2">ALMOST READY</text>
+          </svg>
+        </div>
+      </div>
+      <div class="section-pills">
+        <span class="section-pill reveal">YOUR USER</span>
+        <span class="section-pill reveal">THE PROBLEM</span>
+        <span class="section-pill reveal">YOUR SOLUTION</span>
+        <span class="section-pill reveal">GETTING USERS</span>
+        <span class="section-pill reveal">MEASURING SUCCESS</span>
+      </div>
+    </div>
+
+    <div class="slide" id="slide4" data-slide="4" data-duration="16000">
+      <p class="label-sm reveal">WE RAN IT ON ITSELF</p>
+      <div class="slide-counter">04 / 06</div>
+      <div class="proof-card reveal">
+        <div class="proof-head">
+          <div>
+            <p class="proof-title">ShipCheck</p>
+            <div class="proof-state">
+              <span>Pre-launch readiness</span>
+              <span class="badge">ALMOST READY</span>
+            </div>
+          </div>
+          <svg class="score-circle" width="52" height="52" viewBox="0 0 240 240" role="img" aria-label="ShipCheck score 67">
+            <circle cx="120" cy="120" r="100" fill="none" stroke="var(--surface2)" stroke-width="14"></circle>
+            <circle class="score-ring" cx="120" cy="120" r="100" fill="none" stroke="var(--amber)" stroke-width="14" stroke-linecap="round" stroke-dasharray="628.3" stroke-dashoffset="628.3" transform="rotate(-90 120 120)" style="transition: stroke-dashoffset 1.4s cubic-bezier(0.34,1.56,0.64,1);"></circle>
+            <text class="score-number" x="120" y="128" text-anchor="middle" dominant-baseline="middle" fill="var(--amber)" font-family="Space Mono, monospace" font-weight="700" font-size="70">0</text>
+          </svg>
+        </div>
+        <div class="report-list">
+          <div class="report-row reveal">
+            <span class="dot tier-red"></span>
+            <span>Distribution plan</span>
+            <span class="badge tier-red">RED</span>
+          </div>
+          <div class="report-row reveal">
+            <span class="dot tier-amber"></span>
+            <span>Retention strategy</span>
+            <span class="badge tier-amber">AMBER</span>
+          </div>
+          <div class="report-row reveal">
+            <span class="dot tier-green"></span>
+            <span>User definition</span>
+            <span class="badge tier-green">GREEN</span>
+          </div>
+        </div>
+      </div>
+      <p class="serif proof-quote reveal">The distribution section was the first thing we rewrote.</p>
+    </div>
+
+    <div class="slide" id="slide5" data-slide="5" data-duration="15000">
+      <p class="label-sm reveal">WHAT NOVUS SHOWED US</p>
+      <div class="slide-counter">05 / 06</div>
+      <div class="novus-grid">
+        <div class="bar-column reveal">
+          <p class="bar-label">BEFORE<strong>Question 12<br>drop-off</strong></p>
+          <div class="bar-stage">
+            <div class="bar before"></div>
+          </div>
+          <p class="mono-bold percent before-color"><span class="count-before">0</span>%</p>
+        </div>
+        <p class="arrow reveal" aria-hidden="true">→</p>
+        <div class="bar-column reveal">
+          <p class="bar-label">AFTER<strong>Question 12<br>drop-off</strong></p>
+          <div class="bar-stage">
+            <div class="bar after"></div>
+          </div>
+          <p class="mono-bold percent after-color"><span class="count-after">0</span>%</p>
+        </div>
+      </div>
+      <div class="novus-copy">
+        <h2 class="serif reveal">The tool about measuring readiness<br>had to measure itself.</h2>
+        <p class="mono reveal">Novus session data · Question 12 · Subtext redesigned</p>
+      </div>
+    </div>
+
+    <div class="slide" id="slide6" data-slide="6" data-duration="12000">
+      <div class="slide-counter">06 / 06</div>
+      <div class="closing-stack">
+        <h2 class="serif closing-name reveal">ShipCheck</h2>
+        <p class="mono closing-tagline reveal">20 questions. 10 minutes. An honest score.</p>
+        <hr class="closing-rule reveal">
+        <div class="score-wrap reveal">
+          <svg class="score-circle" width="124" height="124" viewBox="0 0 240 240" role="img" aria-label="ShipCheck score 67">
+            <circle cx="120" cy="120" r="100" fill="none" stroke="var(--surface2)" stroke-width="8"></circle>
+            <circle class="score-ring" cx="120" cy="120" r="100" fill="none" stroke="var(--amber)" stroke-width="8" stroke-linecap="round" stroke-dasharray="628.3" stroke-dashoffset="628.3" transform="rotate(-90 120 120)" style="transition: stroke-dashoffset 1.4s cubic-bezier(0.34,1.56,0.64,1);"></circle>
+            <text class="score-number" x="120" y="124" text-anchor="middle" dominant-baseline="middle" fill="var(--amber)" font-family="Space Mono, monospace" font-weight="700" font-size="64">0</text>
+          </svg>
+        </div>
+        <p class="mono closing-url reveal">shipcheck-three.vercel.app</p>
+        <p class="mono byline reveal">Built for Mind the Product World Product Day 2026<br>Samfresh · Abuja, Nigeria</p>
+      </div>
+    </div>
+  </main>
+
+  <div class="progress-line" id="progressLine"></div>
+
+  <nav class="controls" aria-label="Presentation controls">
+    <button class="control-button" type="button" id="playButton">▶ PLAY</button>
+    <span id="counterDisplay">01 / 06</span>
+    <span class="control-title" id="deckTitle">ShipCheck — MtP World Product Day 2026</span>
+    <button class="control-button" type="button" id="voiceButton">VOICE ON</button>
+  </nav>
+
+  <script>
+    const VOICEOVER = [
+      `Who is your user. What do they do instead of your product. How will the first ten users find you. Most builders ship without ever answering these questions.`,
+      `The problem isn't knowledge. Every builder knows they should think before they ship. The problem is friction. There's no fast, honest tool that sits between an idea and a deploy button and demands the uncomfortable answers.`,
+      `ShipCheck is twenty questions across five sections. Your user. Your problem. Your solution. Your distribution plan. Your metrics. AI evaluates every answer, specific to your product type and stage. Not generic advice. Your actual gaps. Score: zero to one hundred.`,
+      `Before submitting this to the hackathon, we ran ShipCheck on ShipCheck. Score: sixty-seven. Almost ready. Distribution: red. User definition: green. We rewrote the distribution section before submitting. A product about honest product thinking had to apply it to itself first.`,
+      `Novus showed us that forty-three percent of users dropped off at question twelve. The subtext was too abstract. We rewrote it. Drop-off fell to twenty-one percent. The product about measuring readiness had to measure itself.`,
+      `ShipCheck. Twenty questions. Ten minutes. An honest score of your product's readiness before you ship. Try it at shipcheck dash three dot vercel dot app. Built for Mind the Product World Product Day 2026.`,
+    ];
+
+    const SLIDES = [
+      { id: 1, duration: 15000, title: "The Hook", voiceover: VOICEOVER[0] },
+      { id: 2, duration: 13000, title: "The Problem", voiceover: VOICEOVER[1] },
+      { id: 3, duration: 18000, title: "The Product", voiceover: VOICEOVER[2] },
+      { id: 4, duration: 16000, title: "The Proof", voiceover: VOICEOVER[3] },
+      { id: 5, duration: 15000, title: "The Novus Data", voiceover: VOICEOVER[4] },
+      { id: 6, duration: 12000, title: "Ship It", voiceover: VOICEOVER[5] },
+    ];
+
+    const CIRCUMFERENCE = 2 * Math.PI * 100;
+    const TARGET_SCORE = 67;
+    const TOTAL_DURATION = SLIDES.reduce((sum, slide) => sum + slide.duration, 0);
+
+    let currentSlide = 0;
+    let playing = false;
+    let voiceEnabled = true;
+    let hasStarted = false;
+    let slideElapsed = 0;
+    let slideStartedAt = 0;
+    let autoAdvanceTimer = null;
+    let transitionTimer = null;
+    let synth = window.speechSynthesis || null;
+    let utterance = null;
+    let voices = [];
+    const timers = new Set();
+    const intervals = new Set();
+    const rafs = new Set();
+
+    const playButton = document.getElementById("playButton");
+    const voiceButton = document.getElementById("voiceButton");
+    const counterDisplay = document.getElementById("counterDisplay");
+    const deckTitle = document.getElementById("deckTitle");
+    const progressLine = document.getElementById("progressLine");
+    const startPrompt = document.getElementById("startPrompt");
+    const startButton = document.getElementById("startButton");
+
+    function formatCounter(index) {
+      return `${String(index + 1).padStart(2, "0")} / 06`;
+    }
+
+    function slideOffset(index) {
+      return SLIDES.slice(0, index).reduce((sum, slide) => sum + slide.duration, 0);
+    }
+
+    function currentPresentationElapsed() {
+      const currentElapsed = playing ? Math.min(performance.now() - slideStartedAt, SLIDES[currentSlide].duration) : slideElapsed;
+      return Math.min(slideOffset(currentSlide) + currentElapsed, TOTAL_DURATION);
+    }
+
+    function setTimer(fn, delay) {
+      const id = window.setTimeout(() => {
+        timers.delete(id);
+        fn();
+      }, delay);
+      timers.add(id);
+      return id;
+    }
+
+    function clearAnimationJobs() {
+      timers.forEach((id) => clearTimeout(id));
+      timers.clear();
+      intervals.forEach((id) => clearInterval(id));
+      intervals.clear();
+      rafs.forEach((id) => cancelAnimationFrame(id));
+      rafs.clear();
+    }
+
+    function resetSlide(root) {
+      root.querySelectorAll(".reveal").forEach((element) => {
+        element.classList.remove("visible");
+        element.style.transitionDelay = "";
+      });
+      root.querySelectorAll(".timeline-line").forEach((line) => {
+        line.classList.remove("visible");
+      });
+      root.querySelectorAll(".score-ring").forEach((ring) => {
+        ring.style.transition = "none";
+        ring.style.strokeDashoffset = `${CIRCUMFERENCE}`;
+        ring.getBoundingClientRect();
+        ring.style.transition = "stroke-dashoffset 1.4s cubic-bezier(0.34,1.56,0.64,1)";
+      });
+      root.querySelectorAll(".score-number").forEach((number) => {
+        number.textContent = "0";
+      });
+      root.querySelectorAll(".bar").forEach((bar) => {
+        bar.style.transform = "scaleY(0)";
+      });
+      root.querySelectorAll(".count-before, .count-after").forEach((number) => {
+        number.textContent = "0";
+      });
+      const questionGroup = root.querySelector("#questionGroup");
+      if (questionGroup) {
+        questionGroup.style.opacity = "1";
+        questionGroup.querySelectorAll("[data-typewriter]").forEach((line) => {
+          line.textContent = "";
+          line.style.opacity = "1";
+        });
+      }
+    }
+
+    function revealElement(element, delay = 0) {
+      if (!element) return;
+      setTimer(() => element.classList.add("visible"), delay);
+    }
+
+    function revealAll(selector, root, startDelay = 0, step = 150) {
+      root.querySelectorAll(selector).forEach((element, index) => {
+        revealElement(element, startDelay + index * step);
+      });
+    }
+
+    function animateCounter(element, from, to, duration) {
+      if (!element) return;
+      const start = performance.now();
+
+      function step(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        element.textContent = Math.round(from + (to - from) * eased);
+        if (progress < 1) {
+          const id = requestAnimationFrame(step);
+          rafs.add(id);
+        }
+      }
+
+      const id = requestAnimationFrame(step);
+      rafs.add(id);
+    }
+
+    function animateScore(root, delay = 0, target = TARGET_SCORE) {
+      setTimer(() => {
+        const offset = CIRCUMFERENCE - (CIRCUMFERENCE * target / 100);
+        root.querySelectorAll(".score-ring").forEach((ring) => {
+          ring.style.strokeDashoffset = String(offset);
+        });
+        root.querySelectorAll(".score-number").forEach((number) => {
+          animateCounter(number, 0, target, 1400);
+        });
+      }, delay);
+    }
+
+    function typewrite(element, text, onComplete) {
+      element.textContent = "";
+      element.style.opacity = "1";
+      let index = 0;
+      const id = setInterval(() => {
+        element.textContent += text[index];
+        index += 1;
+        if (index >= text.length) {
+          clearInterval(id);
+          intervals.delete(id);
+          if (onComplete) setTimer(onComplete, 100);
+        }
+      }, 55);
+      intervals.add(id);
+    }
+
+    function initSlide1(root) {
+      const lines = Array.from(root.querySelectorAll("[data-typewriter]"));
+      const finals = Array.from(root.querySelectorAll("[data-hook-final]"));
+      const questionGroup = root.querySelector("#questionGroup");
+
+      finals.forEach((element) => element.classList.remove("visible"));
+
+      setTimer(() => {
+        typewrite(lines[0], lines[0].dataset.typewriter, () => {
+          setTimer(() => {
+            typewrite(lines[1], lines[1].dataset.typewriter, () => {
+              setTimer(() => {
+                typewrite(lines[2], lines[2].dataset.typewriter, () => {
+                  setTimer(() => {
+                    questionGroup.style.opacity = "0";
+                    setTimer(() => {
+                      revealElement(finals[0], 0);
+                      revealElement(finals[1], 250);
+                    }, 620);
+                  }, 800);
+                });
+              }, 800);
+            });
+          }, 800);
+        });
+      }, 500);
+    }
+
+    function initSlide2(root) {
+      revealElement(root.querySelector(".label-sm"), 300);
+      revealElement(root.querySelector('[data-step="1"]'), 300);
+      setTimer(() => root.querySelector('[data-line="1"]').classList.add("visible"), 700);
+      revealElement(root.querySelector('[data-step="2"]'), 1000);
+      setTimer(() => root.querySelector('[data-line="2"]').classList.add("visible"), 1400);
+      revealElement(root.querySelector('[data-step="3"]'), 1700);
+      setTimer(() => root.querySelector('[data-line="3"]').classList.add("visible"), 2200);
+      revealElement(root.querySelector('[data-step="4"]'), 2500);
+      revealAll(".problem-copy .reveal", root, 3200, 400);
+    }
+
+    function initSlide3(root) {
+      revealAll(".metric-item", root, 400, 400);
+      revealElement(root.querySelector(".score-wrap"), 1600);
+      animateScore(root, 1600);
+      revealAll(".section-pill", root, 3200, 120);
+    }
+
+    function initSlide4(root) {
+      revealElement(root.querySelector(".label-sm"), 400);
+      revealElement(root.querySelector(".proof-card"), 900);
+      animateScore(root.querySelector(".proof-card"), 1500);
+      const rows = root.querySelectorAll(".report-row");
+      rows.forEach((row, index) => revealElement(row, 2000 + index * 500));
+      revealElement(root.querySelector(".proof-quote"), 3800);
+    }
+
+    function initSlide5(root) {
+      revealElement(root.querySelector(".label-sm"), 300);
+      revealAll(".bar-column", root, 800, 0);
+      setTimer(() => {
+        root.querySelector(".bar.before").style.transform = "scaleY(1)";
+        root.querySelector(".bar.after").style.transform = "scaleY(0.49)";
+        animateCounter(root.querySelector(".count-before"), 0, 43, 900);
+        animateCounter(root.querySelector(".count-after"), 0, 21, 900);
+      }, 900);
+      revealElement(root.querySelector(".arrow"), 1900);
+      revealAll(".novus-copy .reveal", root, 3500, 400);
+    }
+
+    function initSlide6(root) {
+      revealAll(".closing-stack > .reveal", root, 250, 250);
+      animateScore(root, 1500);
+    }
+
+    function initSlide(index) {
+      const root = document.getElementById(`slide${index + 1}`);
+      resetSlide(root);
+      root.dataset.initialized = "true";
+      if (index === 0) initSlide1(root);
+      if (index === 1) initSlide2(root);
+      if (index === 2) initSlide3(root);
+      if (index === 3) initSlide4(root);
+      if (index === 4) initSlide5(root);
+      if (index === 5) initSlide6(root);
+    }
+
+    function updateDisplays() {
+      counterDisplay.textContent = formatCounter(currentSlide);
+      deckTitle.textContent = `ShipCheck — ${SLIDES[currentSlide].title}`;
+    }
+
+    function setProgressInstant(percent) {
+      progressLine.style.transitionDuration = "0ms";
+      progressLine.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+    }
+
+    function resumeProgress() {
+      const elapsed = currentPresentationElapsed();
+      const remaining = Math.max(0, TOTAL_DURATION - elapsed);
+      setProgressInstant((elapsed / TOTAL_DURATION) * 100);
+      requestAnimationFrame(() => {
+        progressLine.style.transitionDuration = `${remaining}ms`;
+        progressLine.style.width = "100%";
+      });
+    }
+
+    function freezeProgress() {
+      const percent = (currentPresentationElapsed() / TOTAL_DURATION) * 100;
+      setProgressInstant(percent);
+    }
+
+    function loadVoices() {
+      if (!synth) return;
+      voices = synth.getVoices();
+    }
+
+    function speak(text) {
+      if (!voiceEnabled || !synth) return;
+      synth.cancel();
+      utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.88;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      loadVoices();
+      const preferred = voices.find((voice) =>
+        voice.name.includes("Daniel") ||
+        voice.name.includes("Google UK English Male") ||
+        voice.name.includes("Microsoft David")
+      );
+      if (preferred) utterance.voice = preferred;
+      synth.speak(utterance);
+    }
+
+    if (synth) {
+      loadVoices();
+      if (typeof synth.addEventListener === "function") {
+        synth.addEventListener("voiceschanged", loadVoices);
+      } else {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+      }
+    }
+
+    function scheduleAutoAdvance() {
+      clearTimeout(autoAdvanceTimer);
+      if (!playing) return;
+      const remaining = Math.max(0, SLIDES[currentSlide].duration - slideElapsed);
+      autoAdvanceTimer = setTimeout(() => {
+        if (currentSlide < SLIDES.length - 1) {
+          goToSlide(currentSlide + 1);
+        } else {
+          pause(true);
+        }
+      }, remaining);
+    }
+
+    function goToSlide(index) {
+      if (index < 0 || index >= SLIDES.length) return;
+      const wasPlaying = playing;
+      clearTimeout(autoAdvanceTimer);
+      clearTimeout(transitionTimer);
+      clearAnimationJobs();
+      if (synth) synth.cancel();
+
+      const currentRoot = document.getElementById(`slide${currentSlide + 1}`);
+      const nextRoot = document.getElementById(`slide${index + 1}`);
+      currentRoot.classList.remove("active");
+      currentSlide = index;
+      slideElapsed = 0;
+      updateDisplays();
+      setProgressInstant((slideOffset(currentSlide) / TOTAL_DURATION) * 100);
+
+      transitionTimer = setTimeout(() => {
+        nextRoot.classList.add("active");
+        initSlide(currentSlide);
+        if (wasPlaying) {
+          slideStartedAt = performance.now();
+          speak(SLIDES[currentSlide].voiceover);
+          scheduleAutoAdvance();
+          resumeProgress();
+        }
+      }, 400);
+    }
+
+    function play() {
+      if (playing) return;
+      if (currentSlide === SLIDES.length - 1 && slideElapsed >= SLIDES[currentSlide].duration) {
+        currentSlide = 0;
+        slideElapsed = 0;
+      }
+      playing = true;
+      hasStarted = true;
+      startPrompt.classList.add("hidden");
+      playButton.textContent = "II PAUSE";
+      slideStartedAt = performance.now() - slideElapsed;
+      const activeRoot = document.getElementById(`slide${currentSlide + 1}`);
+      if (!activeRoot.dataset.initialized) {
+        initSlide(currentSlide);
+        activeRoot.dataset.initialized = "true";
+        speak(SLIDES[currentSlide].voiceover);
+      } else if (slideElapsed === 0) {
+        speak(SLIDES[currentSlide].voiceover);
+      }
+      scheduleAutoAdvance();
+      resumeProgress();
+    }
+
+    function pause(ended = false) {
+      if (playing) {
+        slideElapsed = Math.min(performance.now() - slideStartedAt, SLIDES[currentSlide].duration);
+      }
+      playing = false;
+      clearTimeout(autoAdvanceTimer);
+      if (synth) synth.cancel();
+      playButton.textContent = "▶ PLAY";
+      if (ended) {
+        slideElapsed = SLIDES[currentSlide].duration;
+        setProgressInstant(100);
+      } else {
+        freezeProgress();
+      }
+    }
+
+    function toggleVoice() {
+      voiceEnabled = !voiceEnabled;
+      voiceButton.textContent = voiceEnabled ? "VOICE ON" : "VOICE OFF";
+      if (!voiceEnabled && synth) synth.cancel();
+      if (voiceEnabled && playing) speak(SLIDES[currentSlide].voiceover);
+    }
+
+    playButton.addEventListener("click", () => {
+      playing ? pause() : play();
+    });
+
+    startButton.addEventListener("click", play);
+    voiceButton.addEventListener("click", toggleVoice);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === " ") {
+        event.preventDefault();
+        if (currentSlide < SLIDES.length - 1) {
+          goToSlide(currentSlide + 1);
+        } else {
+          pause(true);
+        }
+      }
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        if (currentSlide > 0) goToSlide(currentSlide - 1);
+      }
+      if (event.key === "p" || event.key === "P") {
+        playing ? pause() : play();
+      }
+    });
+
+    updateDisplays();
+    setProgressInstant(0);
+  </script>
+</body>
+</html>
