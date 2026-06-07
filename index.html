@@ -806,7 +806,7 @@
       <div class="slide-counter">01 / 06</div>
       <div class="start-prompt" id="startPrompt">
         <button type="button" id="startButton">▶ Click to start with voiceover</button>
-        <p class="start-meta">89s • 6 slides • auto-advance</p>
+        <p class="start-meta">2m 11s • 6 slides • auto-advance</p>
       </div>
       <div class="hook-stack" aria-label="Opening questions">
         <div class="typewriter-group" id="questionGroup">
@@ -973,21 +973,37 @@
 
   <script>
     const VOICEOVER = [
-      `Who is your user. What do they do instead of your product. How will the first ten users find you. Most builders ship without ever answering these questions.`,
-      `The problem isn't knowledge. Every builder knows they should think before they ship. The problem is friction. There's no fast, honest tool that sits between an idea and a deploy button and demands the uncomfortable answers.`,
-      `ShipCheck is twenty questions across five sections. Your user. Your problem. Your solution. Your distribution plan. Your metrics. AI evaluates every answer, specific to your product type and stage. Not generic advice. Your actual gaps. Score: zero to one hundred.`,
-      `Before submitting this to the hackathon, we ran ShipCheck on ShipCheck. Score: sixty-seven. Almost ready. Distribution: red. User definition: green. We rewrote the distribution section before submitting. A product about honest product thinking had to apply it to itself first.`,
-      `Novus showed us that forty-three percent of users dropped off at question twelve. The subtext was too abstract. We rewrote it. Drop-off fell to twenty-one percent. The product about measuring readiness had to measure itself.`,
-      `ShipCheck. Twenty questions. Ten minutes. An honest score of your product's readiness before you ship. Try it at shipcheck dash three dot vercel dot app. Built for Mind the Product World Product Day 2026.`,
+      `Who is your user. What do they do instead of your product. How will the first ten users find you. Most builders rush past those questions because shipping feels urgent. ShipCheck slows that moment down, just enough to stop a weak launch before it becomes a public one.`,
+      `The problem isn't knowledge. Every builder knows they should think before they ship. The problem is friction. Product thinking usually lives in scattered notes, gut checks, and late-night doubts. ShipCheck turns that messy pre-launch moment into a fast, honest review that asks the uncomfortable questions while there is still time to fix the answer.`,
+      `ShipCheck is twenty questions across five sections: user, problem, solution, distribution, and metrics. You answer in plain language. AI evaluates each answer for your product type and stage, then returns a score from zero to one hundred with section-by-section gaps. Not generic advice. A readiness check you can actually act on before you deploy.`,
+      `Before submitting this to the hackathon, we ran ShipCheck on ShipCheck. The score came back sixty-seven: almost ready. Distribution was red. User definition was green. Retention was amber. That result changed the submission. We rewrote the distribution section before shipping, because a product about honest product thinking had to apply the same pressure to itself first.`,
+      `Novus data gave us the second proof point. In the seeded report story, forty-three percent of users dropped off at question twelve. The question was not broken; the subtext was too abstract. We rewrote it to be clearer and more concrete. Drop-off fell to twenty-one percent. ShipCheck did not just evaluate readiness. It used product data to improve itself.`,
+      `ShipCheck is simple on purpose. Twenty questions. About ten minutes. One honest score showing whether your product is ready enough to ship, and where it will probably break first. Try it at shipcheck dash three dot vercel dot app. Built for Mind the Product World Product Day 2026.`,
     ];
 
     const SLIDES = [
-      { id: 1, duration: 15000, title: "The Hook", voiceover: VOICEOVER[0] },
-      { id: 2, duration: 13000, title: "The Problem", voiceover: VOICEOVER[1] },
-      { id: 3, duration: 18000, title: "The Product", voiceover: VOICEOVER[2] },
-      { id: 4, duration: 16000, title: "The Proof", voiceover: VOICEOVER[3] },
-      { id: 5, duration: 15000, title: "The Novus Data", voiceover: VOICEOVER[4] },
-      { id: 6, duration: 12000, title: "Ship It", voiceover: VOICEOVER[5] },
+      { id: 1, duration: 19000, title: "The Hook", voiceover: VOICEOVER[0] },
+      { id: 2, duration: 23000, title: "The Problem", voiceover: VOICEOVER[1] },
+      { id: 3, duration: 24000, title: "The Product", voiceover: VOICEOVER[2] },
+      { id: 4, duration: 24000, title: "The Proof", voiceover: VOICEOVER[3] },
+      { id: 5, duration: 23000, title: "The Novus Data", voiceover: VOICEOVER[4] },
+      { id: 6, duration: 18000, title: "Ship It", voiceover: VOICEOVER[5] },
+    ];
+
+    const VOICE_STYLE = { rate: 1.04, pitch: 1.12, volume: 1.0 };
+    const PREFERRED_VOICE_HINTS = [
+      "Microsoft Emma",
+      "Emma",
+      "Microsoft Ava",
+      "Ava",
+      "Microsoft Aria",
+      "Aria",
+      "Google US English",
+      "Google UK English Female",
+      "Samantha",
+      "Jenny",
+      "Zira",
+      "Karen",
     ];
 
     const CIRCUMFERENCE = 2 * Math.PI * 100;
@@ -1225,6 +1241,43 @@
       if (index === 5) initSlide6(root);
     }
 
+    function forceSlideComplete(index) {
+      const root = document.getElementById(`slide${index + 1}`);
+      clearAnimationJobs();
+      root.querySelectorAll(".reveal").forEach((element) => {
+        element.classList.add("visible");
+        element.style.transitionDelay = "0ms";
+      });
+      root.querySelectorAll(".timeline-line").forEach((line) => line.classList.add("visible"));
+      root.querySelectorAll("[data-typewriter]").forEach((line) => {
+        line.textContent = line.dataset.typewriter || line.textContent;
+        line.style.opacity = "1";
+      });
+      root.querySelectorAll(".score-ring").forEach((ring) => {
+        const target = Number(ring.closest("[data-score]")?.dataset.score || TARGET_SCORE);
+        const offset = CIRCUMFERENCE - (CIRCUMFERENCE * target / 100);
+        ring.style.transition = "none";
+        ring.style.strokeDashoffset = String(offset);
+      });
+      root.querySelectorAll(".score-number").forEach((number) => {
+        number.textContent = String(Number(number.closest("[data-score]")?.dataset.score || TARGET_SCORE));
+      });
+      root.querySelectorAll(".bar.before").forEach((bar) => {
+        bar.style.transform = "scaleY(1)";
+      });
+      root.querySelectorAll(".bar.after").forEach((bar) => {
+        bar.style.transform = "scaleY(0.49)";
+      });
+      root.querySelectorAll(".count-before").forEach((number) => {
+        number.textContent = "43";
+      });
+      root.querySelectorAll(".count-after").forEach((number) => {
+        number.textContent = "21";
+      });
+      const questionGroup = root.querySelector("#questionGroup");
+      if (questionGroup) questionGroup.style.opacity = "0";
+    }
+
     function updateDisplays() {
       counterDisplay.textContent = formatCounter(currentSlide);
       deckTitle.textContent = `ShipCheck — ${SLIDES[currentSlide].title}`;
@@ -1259,15 +1312,14 @@
       if (!voiceEnabled || !synth) return;
       synth.cancel();
       utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.88;
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
+      utterance.rate = VOICE_STYLE.rate;
+      utterance.pitch = VOICE_STYLE.pitch;
+      utterance.volume = VOICE_STYLE.volume;
       loadVoices();
-      const preferred = voices.find((voice) =>
-        voice.name.includes("Daniel") ||
-        voice.name.includes("Google UK English Male") ||
-        voice.name.includes("Microsoft David")
-      );
+      const englishVoices = voices.filter((voice) => /^en[-_]/i.test(voice.lang) || /English/i.test(voice.lang));
+      const preferred = PREFERRED_VOICE_HINTS
+        .map((hint) => englishVoices.find((voice) => voice.name.includes(hint)))
+        .find(Boolean) || englishVoices[0];
       if (preferred) utterance.voice = preferred;
       synth.speak(utterance);
     }
@@ -1374,6 +1426,46 @@
 
     startButton.addEventListener("click", play);
     voiceButton.addEventListener("click", toggleVoice);
+
+    window.shipcheckDeck = {
+      playSilent() {
+        voiceEnabled = false;
+        voiceButton.textContent = "VOICE OFF";
+        play();
+      },
+      showCaptureSlide(index) {
+        const slideIndex = Math.max(0, Math.min(SLIDES.length - 1, index));
+        clearTimeout(autoAdvanceTimer);
+        clearTimeout(transitionTimer);
+        clearAnimationJobs();
+        if (synth) synth.cancel();
+        document.querySelectorAll(".slide").forEach((slide) => slide.classList.remove("active"));
+        currentSlide = slideIndex;
+        playing = false;
+        slideElapsed = 0;
+        startPrompt.classList.add("hidden");
+        const root = document.getElementById(`slide${currentSlide + 1}`);
+        root.classList.add("active");
+        updateDisplays();
+        initSlide(currentSlide);
+        forceSlideComplete(currentSlide);
+        setProgressInstant((slideOffset(currentSlide) / TOTAL_DURATION) * 100);
+      },
+      slides: SLIDES.map(({ id, duration, title, voiceover }) => ({ id, duration, title, voiceover })),
+      totalDuration: TOTAL_DURATION,
+      voiceStyle: VOICE_STYLE,
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("captureSlide")) {
+      const captureIndex = Number(urlParams.get("captureSlide")) - 1;
+      window.shipcheckDeck.showCaptureSlide(captureIndex);
+    } else if (urlParams.has("record")) {
+      startPrompt.classList.add("hidden");
+      window.addEventListener("load", () => {
+        setTimeout(() => window.shipcheckDeck.playSilent(), 100);
+      });
+    }
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "ArrowRight" || event.key === " ") {
