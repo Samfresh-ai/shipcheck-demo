@@ -918,28 +918,28 @@
     </div>
 
     <div class="slide" id="slide5" data-slide="5" data-duration="15000">
-      <p class="label-sm reveal">WHAT NOVUS SHOWED US</p>
+      <p class="label-sm reveal">WHAT NOVUS PROVES NOW</p>
       <div class="slide-counter">05 / 06</div>
       <div class="novus-grid">
         <div class="bar-column reveal">
-          <p class="bar-label">BEFORE<strong>Question 12<br>drop-off</strong></p>
+          <p class="bar-label">TRACKED<strong>Core product<br>events</strong></p>
           <div class="bar-stage">
             <div class="bar before"></div>
           </div>
-          <p class="mono-bold percent before-color"><span class="count-before">0</span>%</p>
+          <p class="mono-bold percent before-color"><span class="count-before">0</span> events</p>
         </div>
         <p class="arrow reveal" aria-hidden="true">→</p>
         <div class="bar-column reveal">
-          <p class="bar-label">AFTER<strong>Question 12<br>drop-off</strong></p>
+          <p class="bar-label">PROVED<strong>Full report<br>questions</strong></p>
           <div class="bar-stage">
             <div class="bar after"></div>
           </div>
-          <p class="mono-bold percent after-color"><span class="count-after">0</span>%</p>
+          <p class="mono-bold percent after-color"><span class="count-after">0</span> questions</p>
         </div>
       </div>
       <div class="novus-copy">
-        <h2 class="serif reveal">The tool about measuring readiness<br>had to measure itself.</h2>
-        <p class="mono reveal">Novus session data · Question 12 · Subtext redesigned</p>
+        <h2 class="serif reveal">The tool about measuring readiness<br>is instrumented to measure itself.</h2>
+        <p class="mono reveal">Novus/Pendo installed · report flow tracked · dashboard screenshot next</p>
       </div>
     </div>
 
@@ -977,7 +977,7 @@
       `The problem isn't knowledge. Every builder knows they should think before they ship. The problem is friction. Product thinking usually lives in scattered notes, gut checks, and late-night doubts. ShipCheck turns that messy pre-launch moment into a fast, honest review that asks the uncomfortable questions while there is still time to fix the answer.`,
       `ShipCheck is twenty questions across five sections: user, problem, solution, distribution, and metrics. You answer in plain language. AI evaluates each answer for your product type and stage, then returns a score from zero to one hundred with section-by-section gaps. Not generic advice. A readiness check you can actually act on before you deploy.`,
       `Before submitting this to the hackathon, we ran ShipCheck on ShipCheck. The score came back sixty-seven: almost ready. Distribution was red. User definition was green. Retention was amber. That result changed the submission. We rewrote the distribution section before shipping, because a product about honest product thinking had to apply the same pressure to itself first.`,
-      `Novus data gave us the second proof point. In the seeded report story, forty-three percent of users dropped off at question twelve. The question was not broken; the subtext was too abstract. We rewrote it to be clearer and more concrete. Drop-off fell to twenty-one percent. ShipCheck did not just evaluate readiness. It used product data to improve itself.`,
+      `Novus gives ShipCheck the measurement layer the hackathon asks for. The app is instrumented through Pendo, the report flow emits tracked events, and the product now has a concrete analytics path: compare where users drop off, which reports complete, and which weak answers they react to. The dashboard screenshot is the next submission artifact, not something we should fake.`,
       `ShipCheck is simple on purpose. Twenty questions. About ten minutes. One honest score showing whether your product is ready enough to ship, and where it will probably break first. Try it at shipcheck dash three dot vercel dot app. Built for Mind the Product World Product Day 2026.`,
     ];
 
@@ -986,7 +986,7 @@
       { id: 2, duration: 23000, title: "The Problem", voiceover: VOICEOVER[1] },
       { id: 3, duration: 24000, title: "The Product", voiceover: VOICEOVER[2] },
       { id: 4, duration: 24000, title: "The Proof", voiceover: VOICEOVER[3] },
-      { id: 5, duration: 23000, title: "The Novus Data", voiceover: VOICEOVER[4] },
+      { id: 5, duration: 23000, title: "The Analytics Proof", voiceover: VOICEOVER[4] },
       { id: 6, duration: 18000, title: "Ship It", voiceover: VOICEOVER[5] },
     ];
 
@@ -1216,9 +1216,9 @@
       revealAll(".bar-column", root, 800, 0);
       setTimer(() => {
         root.querySelector(".bar.before").style.transform = "scaleY(1)";
-        root.querySelector(".bar.after").style.transform = "scaleY(0.49)";
-        animateCounter(root.querySelector(".count-before"), 0, 43, 900);
-        animateCounter(root.querySelector(".count-after"), 0, 21, 900);
+        root.querySelector(".bar.after").style.transform = "scaleY(1)";
+        animateCounter(root.querySelector(".count-before"), 0, 5, 900);
+        animateCounter(root.querySelector(".count-after"), 0, 20, 900);
       }, 900);
       revealElement(root.querySelector(".arrow"), 1900);
       revealAll(".novus-copy .reveal", root, 3500, 400);
@@ -1266,13 +1266,13 @@
         bar.style.transform = "scaleY(1)";
       });
       root.querySelectorAll(".bar.after").forEach((bar) => {
-        bar.style.transform = "scaleY(0.49)";
+        bar.style.transform = "scaleY(1)";
       });
       root.querySelectorAll(".count-before").forEach((number) => {
-        number.textContent = "43";
+        number.textContent = "5";
       });
       root.querySelectorAll(".count-after").forEach((number) => {
-        number.textContent = "21";
+        number.textContent = "20";
       });
       const questionGroup = root.querySelector("#questionGroup");
       if (questionGroup) questionGroup.style.opacity = "0";
